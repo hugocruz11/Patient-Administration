@@ -1,24 +1,60 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment, useState, useEffect } from 'react';
+import Form from './components/Form'
+import Appointment from './components/Appointments'
 
 function App() {
+
+  let initialAppointments = JSON.parse(localStorage.getItem('appointments'));
+
+  if (!initialAppointments) {
+    initialAppointments = [];
+  }
+
+  const [appointments, setAppointments] = useState(initialAppointments)
+
+  const createAppointments = appointment => {
+    setAppointments([
+      ...appointments,
+      appointment
+    ])
+  }
+
+  useEffect(() => {
+    if (initialAppointments) {
+      localStorage.setItem('appointments', JSON.stringify(appointments))
+    } else {
+      localStorage.setItem('appointments', JSON.stringify([]))
+    }
+  }, [appointments, initialAppointments]);
+
+  const deleteAppointments = id => {
+    const newAppointments = appointments.filter(appointment => appointment.id !== id);
+    setAppointments(newAppointments)
+  }
+
+  const tittle = appointments.length === 0 ? 'No Appointments' : 'Manage your Appointments'
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>
+      <h1>Patient Administration</h1>
+      <div className="Container">
+        <div className="one-half column">
+          <Form
+            createAppointments={createAppointments}
+          />
+        </div>
+        <div className="one-half column">
+          <h2>{tittle}</h2>
+          {appointments.map(appointment => (
+            <Appointment
+              key={appointment.id}
+              appointment={appointment}
+              deleteAppointments={deleteAppointments}
+            />
+          ))}
+        </div>
+      </div>
+    </Fragment>
   );
 }
 
